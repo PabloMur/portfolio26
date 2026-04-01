@@ -6,13 +6,13 @@ export const Footer = () => {
                     &copy; {new Date().getFullYear()} Pablo Murillo. All rights reserved.
                 </p>
                 <div className="flex gap-6">
-                    <a href="https://github.com/PabloMur" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-indigo-400 transition-colors text-sm">
+                    <a href="https://github.com/PabloMur" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-violet-400 transition-colors text-sm">
                         GitHub
                     </a>
-                    <a href="https://www.linkedin.com/in/pablo-nicolas-murillo/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-indigo-400 transition-colors text-sm">
+                    <a href="https://www.linkedin.com/in/pablo-nicolas-murillo/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-violet-400 transition-colors text-sm">
                         LinkedIn
                     </a>
-                    <a href="mailto:pablomurillo.sp@gmail.com" className="text-gray-500 hover:text-indigo-400 transition-colors text-sm">
+                    <a href="mailto:pablomurillo.sp@gmail.com" className="text-gray-500 hover:text-violet-400 transition-colors text-sm">
                         Email
                     </a>
                 </div>

@@ -10,7 +10,7 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ image, title, description, githubUrl, deployUrl }: ProjectCardProps) {
     return (
-        <div className="group bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 flex flex-col">
+        <div className="group bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden transition-all duration-300 hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 flex flex-col">
             <div className="h-28 overflow-hidden">
                 <img
                     src={image}

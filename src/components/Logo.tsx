@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
 import logo from "/Group 34.png";
 
-export default function Logo() {
+interface LogoProps {
+    textClassName?: string;
+}
+
+export default function Logo({ textClassName = "text-gray-800" }: LogoProps) {
     return (
-        <Link to="/" className="flex items-center gap-3 py-4 px-2 mb-6">
-            <img src={logo} alt="PM Logo" className="w-20 h-20" />
-            <span className="text-2xl font-semibold tracking-tight text-gray-800">Pablo Murillo</span>
+        <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="PM Logo" className="h-12 w-12 sm:h-14 sm:w-14" />
+            <span className={`text-lg font-semibold tracking-tight sm:text-xl ${textClassName}`}>Pablo Murillo</span>
         </Link>
     );
 }

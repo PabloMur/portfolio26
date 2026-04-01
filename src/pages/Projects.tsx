@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import ProjectCard from "../components/ui/ProjectCard";
 import { AiOutlineLeft, AiOutlineRight, AiOutlineLoading3Quarters } from "react-icons/ai";
 import { fetchProjects, type AirtableProject } from "../services/airtable";
+import { useLanguage } from "../context/LanguageContext";
 
 const PER_PAGE = 3;
 
 export default function Projects() {
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<AirtableProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,17 +28,17 @@ export default function Projects() {
 
   return (
     <div className="min-h-screen bg-gray-950 px-6 md:px-12 lg:px-20 py-16 flex flex-col">
-      <p className="text-indigo-400 font-mono text-sm tracking-widest uppercase mb-4 animate-fade-in-up">
-        Portfolio
+      <p className="text-violet-400 font-mono text-sm tracking-widest uppercase mb-4 animate-fade-in-up">
+        {t.projects.label}
       </p>
       <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-12 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-        My Projects
+        {t.projects.title}
       </h1>
 
       <div className="flex-1">
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <AiOutlineLoading3Quarters className="text-4xl text-indigo-400 animate-spin" />
+            <AiOutlineLoading3Quarters className="text-4xl text-violet-400 animate-spin" />
           </div>
         )}
 
