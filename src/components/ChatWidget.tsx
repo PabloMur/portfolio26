@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { sendGroqMessage } from "../services/groq";
+import { sendGroqMessage, type ProjectSummary } from "../services/groq";
+import { fetchProjects } from "../services/airtable";
 import {
   AiOutlineMessage,
   AiOutlineClose,
@@ -90,7 +91,23 @@ export default function ChatWidget() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchProjects()
+      .then((data) =>
+        setProjects(
+          data.map((p) => ({
+            title: p.title,
+            description: p.description,
+            githubUrl: p.githubUrl,
+            deployUrl: p.deployUrl,
+          }))
+        )
+      )
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: INITIAL_MESSAGES[lang] }]);
@@ -109,7 +126,7 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      const reply = await sendGroqMessage([...messages, userMsg], lang);
+      const reply = await sendGroqMessage([...messages, userMsg], lang, projects);
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch {
       setMessages((prev) => [

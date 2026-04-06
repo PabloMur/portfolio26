@@ -73,6 +73,7 @@ BEHAVIOR RULES
 7. Maintain a professional, confident, and natural tone (not robotic, not overly casual).
 8. Do NOT say you are an AI model or mention being Claude, GPT, or any AI brand.
 9. Act as a smart, helpful assistant representing Pablo.
+10. If the user wants to contact Pablo or asks how to reach him, ONLY provide his email: pablomurillo.sp@gmail.com. Do not mention any other contact method.
 
 ---
 
@@ -88,11 +89,37 @@ type Message = {
   content: string;
 };
 
-export async function sendGroqMessage(messages: Message[], lang: "en" | "es" = "en"): Promise<string> {
+export interface ProjectSummary {
+  title: string;
+  description: string;
+  githubUrl: string;
+  deployUrl: string;
+}
+
+function buildProjectsSection(projects: ProjectSummary[]): string {
+  if (projects.length === 0) return "";
+  const list = projects
+    .map((p) => {
+      let entry = `- **${p.title}**: ${p.description}`;
+      if (p.githubUrl) entry += `\n  GitHub: ${p.githubUrl}`;
+      if (p.deployUrl) entry += `\n  Live: ${p.deployUrl}`;
+      return entry;
+    })
+    .join("\n");
+  return `\n\n---\n\nPORTFOLIO PROJECTS (live from database)\n\n${list}`;
+}
+
+export async function sendGroqMessage(
+  messages: Message[],
+  lang: "en" | "es" = "en",
+  projects: ProjectSummary[] = []
+): Promise<string> {
   const langInstruction =
     lang === "es"
       ? "\n\nIMPORTANT: You MUST respond in Spanish. Always."
       : "\n\nIMPORTANT: You MUST respond in English. Always.";
+
+  const fullPrompt = SYSTEM_PROMPT + buildProjectsSection(projects) + langInstruction;
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -103,7 +130,7 @@ export async function sendGroqMessage(messages: Message[], lang: "en" | "es" = "
     body: JSON.stringify({
       model: "llama-3.3-70b-versatile",
       messages: [
-        { role: "system", content: SYSTEM_PROMPT + langInstruction },
+        { role: "system", content: fullPrompt },
         ...messages,
       ],
       max_tokens: 280,
