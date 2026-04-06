@@ -44,54 +44,54 @@ export default function Home() {
 
           {/* CTAs */}
           <div
-            className="mb-8 flex w-full flex-col items-stretch gap-3 animate-fade-in-up sm:w-auto sm:flex-row sm:items-center"
+            className="mb-8 grid w-full grid-cols-2 gap-3 animate-fade-in-up sm:flex sm:flex-row sm:flex-wrap sm:w-auto"
             style={{ animationDelay: "0.4s" }}
           >
-            <Link
-              to="/contact"
-              className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-indigo-500"
-            >
-              {h.ctaPrimary}
-              <AiOutlineArrowRight />
-            </Link>
-            <Link
-              to="/projects"
-              className="rounded-xl border border-gray-700 bg-transparent px-6 py-3 text-center font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900"
-            >
-              {h.ctaSecondary}
-            </Link>
-            <a
-              href="https://github.com/PabloMur"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
-            >
-              <AiOutlineGithub className="text-lg" />
-              GitHub
-            </a>
             <a
               href="https://www.linkedin.com/in/pablo-nicolas-murillo/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
+              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
             >
               <AiFillLinkedin className="text-lg" />
               LinkedIn
             </a>
+            <a
+              href="https://github.com/PabloMur"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
+            >
+              <AiOutlineGithub className="text-lg" />
+              GitHub
+            </a>
+            <Link
+              to="/projects"
+              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 bg-transparent px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900"
+            >
+              {h.ctaSecondary}
+            </Link>
+            <Link
+              to="/contact"
+              className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+            >
+              {h.ctaPrimary}
+              <AiOutlineArrowRight />
+            </Link>
           </div>
 
           {/* Stats */}
           <div
-            className="grid w-full max-w-xl grid-cols-1 gap-4 text-center animate-fade-in-up sm:grid-cols-3 sm:gap-6 lg:text-left"
+            className="flex w-full max-w-xl divide-x divide-gray-800 animate-fade-in-up"
             style={{ animationDelay: "0.5s" }}
           >
             {h.stats.map((stat, i) => (
               <div
                 key={i}
-                className={i !== 0 ? "border-t border-gray-800 pt-4 sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0" : ""}
+                className={`flex flex-col justify-center text-center lg:text-left ${i === 0 ? "pr-6 sm:pr-8" : "px-6 sm:px-8"}`}
               >
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
+                <p className="text-2xl font-bold text-white leading-none">{stat.value}</p>
+                <p className="text-xs text-gray-500 mt-1 whitespace-nowrap">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -103,14 +103,12 @@ export default function Home() {
           style={{ animationDelay: "0.3s" }}
         >
           <div className="absolute inset-6 rounded-full bg-violet-500/10 blur-3xl" />
-          <div className="relative rounded-[2rem] border border-gray-800/80 bg-white/5 p-4 shadow-2xl shadow-violet-950/30 backdrop-blur-sm">
-            <div className="h-40 w-40 overflow-hidden rounded-full border border-white/10 ring-1 ring-violet-400/20 sm:h-48 sm:w-48 md:h-56 md:w-56 lg:h-[15rem] lg:w-[15rem] xl:h-[17rem] xl:w-[17rem]">
-              <img
-                src="https://github.com/PabloMur.png"
-                alt="Pablo Murillo"
-                className="h-full w-full object-cover object-center"
-              />
-            </div>
+          <div className="relative h-40 w-40 overflow-hidden rounded-full border border-white/10 ring-2 ring-violet-400/30 shadow-2xl shadow-violet-950/30 sm:h-48 sm:w-48 md:h-56 md:w-56 lg:h-60 lg:w-60 xl:h-68 xl:w-68">
+            <img
+              src="https://github.com/PabloMur.png"
+              alt="Pablo Murillo"
+              className="h-full w-full object-cover object-center"
+            />
           </div>
         </div>
       </div>
