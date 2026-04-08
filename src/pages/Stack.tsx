@@ -1,4 +1,5 @@
 import StackCard from "../components/ui/StackCard";
+import { useLanguage } from "../context/LanguageContext";
 import {
     SiJavascript, SiTypescript, SiHtml5, SiCss3,
     SiReact, SiNextdotjs, SiGit, SiGithub,
@@ -23,43 +24,38 @@ const stack = [
     { icon: <SiHeroku className="text-violet-500" />, title: "Heroku" },
 ];
 
-import { useLanguage } from "../context/LanguageContext";
-
 export default function Stack() {
     const { t } = useLanguage();
 
     return (
-        <div className="relative min-h-screen bg-gray-950 px-6 md:px-12 lg:px-20 py-16 overflow-hidden">
-            <p className="text-violet-400 font-mono text-sm tracking-widest uppercase mb-4 animate-fade-in-up">
-                {t.stack.label}
-            </p>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-                {t.stack.title}
-            </h1>
-            <p className="text-gray-400 text-base md:text-lg mb-12 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-                {t.stack.subtitle}
-            </p>
+        <div className="relative min-h-screen bg-gray-950 overflow-hidden py-16 px-6 sm:px-8">
+            <div className="max-w-6xl mx-auto">
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-5 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-                {stack.map((item) => (
-                    <StackCard key={item.title} icon={item.icon} title={item.title} />
-                ))}
+                {/* Header */}
+                <div className="mb-14 animate-fade-in-up">
+                    <p className="text-violet-400 font-mono text-xs tracking-widest uppercase mb-3">
+                        {t.stack.label}
+                    </p>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                        {t.stack.title}
+                    </h1>
+                    <p className="text-gray-400 text-base md:text-lg max-w-2xl">
+                        {t.stack.subtitle}
+                    </p>
+                </div>
+
+                {/* Grid */}
+                <div
+                    className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4 animate-fade-in-up"
+                    style={{ animationDelay: "0.2s" }}
+                >
+                    {stack.map((item) => (
+                        <StackCard key={item.title} icon={item.icon} title={item.title} />
+                    ))}
+                </div>
             </div>
 
-            {/* Círculo decorativo */}
-            <div
-                className="
-                    absolute
-                    -bottom-20
-                    left-1/3
-                    w-80 md:w-150
-                    h-52 md:h-100
-                    bg-violet-600
-                    rounded-full
-                    opacity-20
-                    blur-[120px]
-                "
-            />
+            <div className="absolute -bottom-20 left-1/3 w-80 md:w-150 h-52 md:h-100 bg-violet-600 rounded-full opacity-20 blur-[120px] pointer-events-none" />
         </div>
     );
 }

@@ -54,35 +54,8 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* Círculo superior derecho */}
-      <div
-        className="
-          absolute
-          -top-20
-          -right-20
-          w-64 md:w-125
-          h-64 md:h-125
-          bg-violet-600
-          rounded-full
-          opacity-30
-          blur-[120px]
-        "
-      />
-
-      {/* Círculo inferior izquierdo */}
-      <div
-        className="
-          absolute
-          -bottom-20
-          -left-20
-          w-80 md:w-150
-          h-52 md:h-100
-          bg-violet-600
-          rounded-full
-          opacity-25
-          blur-[120px]
-        "
-      />
+      <div className="absolute -top-20 -right-20 w-64 md:w-125 h-64 md:h-125 bg-violet-600 rounded-full opacity-30 blur-[120px]" />
+      <div className="absolute -bottom-20 -left-20 w-80 md:w-150 h-52 md:h-100 bg-violet-600 rounded-full opacity-25 blur-[120px]" />
     </div>
   );
 }

@@ -13,6 +13,7 @@ export interface AirtableProject {
   image: string;
   title: string;
   description: string;
+  descriptionEn: string;
   githubUrl: string;
   deployUrl: string;
 }
@@ -37,6 +38,7 @@ function mapRecord(record: AirtableRecord): AirtableProject {
     id: record.id,
     title: record.fields.title || "",
     description: record.fields.description || "",
+    descriptionEn: record.fields.descriptionEn || "",
     image,
     githubUrl: record.fields.githubUrl || "",
     deployUrl: record.fields.deployUrl || "",

@@ -21,6 +21,7 @@ import {
 type FormState = {
   title: string;
   description: string;
+  descriptionEn: string;
   githubUrl: string;
   deployUrl: string;
 };
@@ -28,6 +29,7 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   title: "",
   description: "",
+  descriptionEn: "",
   githubUrl: "",
   deployUrl: "",
 };
@@ -65,6 +67,7 @@ export default function Projects() {
     setForm({
       title: p.title,
       description: p.description,
+      descriptionEn: p.descriptionEn,
       githubUrl: p.githubUrl,
       deployUrl: p.deployUrl,
     });
@@ -249,14 +252,25 @@ export default function Projects() {
                 />
               </div>
 
-              {/* Description */}
+              {/* Description ES */}
               <div>
-                <label className="block text-xs text-gray-500 mb-1.5 font-mono">Descripción</label>
+                <label className="block text-xs text-gray-500 mb-1.5 font-mono">Descripción (ES)</label>
                 <textarea
                   required
-                  rows={3}
+                  rows={2}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors resize-none"
+                />
+              </div>
+
+              {/* Description EN */}
+              <div>
+                <label className="block text-xs text-gray-500 mb-1.5 font-mono">Descripción (EN)</label>
+                <textarea
+                  rows={2}
+                  value={form.descriptionEn}
+                  onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })}
                   className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors resize-none"
                 />
               </div>

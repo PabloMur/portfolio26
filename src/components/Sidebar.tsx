@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import PulseBorderLink from "./ui/PulseBorderLink";
 import Logo from "./Logo";
 import {
     AiOutlineHome,
@@ -31,10 +32,10 @@ export const Sidebar = () => {
 
     const links = [
         { to: "/", label: t.nav.home },
+        { to: "/projects", label: t.nav.projects, highlight: true },
         { to: "/about", label: t.nav.about },
         { to: "/education", label: t.nav.education },
         { to: "/stack", label: t.nav.stack },
-        { to: "/projects", label: t.nav.projects },
         { to: "/services", label: t.nav.services },
         { to: "/contact", label: t.nav.contact },
     ];
@@ -48,6 +49,14 @@ export const Sidebar = () => {
                     <nav className="hidden items-center gap-1 lg:flex">
                         {links.map((link) => {
                             const active = pathname === link.to;
+
+                            if (link.highlight) {
+                                return (
+                                    <PulseBorderLink key={link.to} to={link.to}>
+                                        {link.label}
+                                    </PulseBorderLink>
+                                );
+                            }
 
                             return (
                                 <Link
@@ -111,13 +120,27 @@ export const Sidebar = () => {
                     {links.map((link) => {
                         const active = pathname === link.to;
 
+                        if (link.highlight) {
+                            return (
+                                <PulseBorderLink key={link.to} to={link.to}>
+                                    <span className="flex items-center gap-3">
+                                        <span className="text-lg text-indigo-500">
+                                            {navIcons[link.to as keyof typeof navIcons]}
+                                        </span>
+                                        {link.label}
+                                    </span>
+                                </PulseBorderLink>
+                            );
+                        }
+
                         return (
                             <Link
                                 key={link.to}
                                 to={link.to}
-                                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${active
-                                    ? "bg-indigo-600/20 text-indigo-300 ring-1 ring-indigo-500/40"
-                                    : "text-gray-300 hover:bg-white/5 hover:text-white"
+                                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
+                                    active
+                                        ? "bg-indigo-600/20 text-indigo-300 ring-1 ring-indigo-500/40"
+                                        : "text-gray-300 hover:bg-white/5 hover:text-white"
                                     }`}
                             >
                                 <span className={`text-lg ${active ? "text-violet-300" : "text-violet-400"}`}>

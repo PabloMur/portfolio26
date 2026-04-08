@@ -39,6 +39,15 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
+.nav-pulse-rect {
+  stroke-dashoffset: 0;
+  animation: nav-pulse-travel 2.5s linear infinite;
+}
+
+@keyframes nav-pulse-travel {
+  to { stroke-dashoffset: var(--neg-perimeter, -300); }
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
