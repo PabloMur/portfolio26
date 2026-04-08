@@ -1,16 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App'
 import { LanguageProvider } from './context/LanguageContext'
+import { AuthProvider } from './context/AuthContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <LanguageProvider>
-        <App />
-      </LanguageProvider>
+      <AuthProvider>
+        <LanguageProvider>
+          <App />
+          <Analytics />
+        </LanguageProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 )
