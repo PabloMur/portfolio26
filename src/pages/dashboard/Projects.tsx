@@ -16,6 +16,7 @@ import {
   AiOutlineLoading3Quarters,
   AiOutlineClose,
   AiOutlineCloudUpload,
+  AiFillStar,
 } from "react-icons/ai";
 
 type FormState = {
@@ -24,6 +25,8 @@ type FormState = {
   descriptionEn: string;
   githubUrl: string;
   deployUrl: string;
+  featured: boolean;
+  order: number;
 };
 
 const EMPTY_FORM: FormState = {
@@ -32,6 +35,8 @@ const EMPTY_FORM: FormState = {
   descriptionEn: "",
   githubUrl: "",
   deployUrl: "",
+  featured: false,
+  order: 999,
 };
 
 export default function Projects() {
@@ -70,6 +75,8 @@ export default function Projects() {
       descriptionEn: p.descriptionEn,
       githubUrl: p.githubUrl,
       deployUrl: p.deployUrl,
+      featured: p.featured,
+      order: p.order,
     });
     setImageFile(null);
     setImagePreview(p.image);
@@ -155,12 +162,25 @@ export default function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {projects.map((p) => (
-            <div key={p.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+            <div key={p.id} className={`bg-gray-900 border rounded-2xl overflow-hidden ${p.featured ? "border-violet-500/50" : "border-gray-800"}`}>
               {p.image && (
-                <img src={p.image} alt={p.title} className="w-full h-40 object-cover" />
+                <div className="relative">
+                  <img src={p.image} alt={p.title} className="w-full h-40 object-cover" />
+                  {p.featured && (
+                    <span className="absolute top-2 right-2 flex items-center gap-1 bg-violet-600/90 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                      <AiFillStar size={10} />
+                      Destacado
+                    </span>
+                  )}
+                </div>
               )}
               <div className="p-4">
-                <h2 className="text-white font-semibold text-sm mb-1 truncate">{p.title}</h2>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-white font-semibold text-sm truncate">{p.title}</h2>
+                  {p.order !== 999 && (
+                    <span className="text-gray-600 text-[10px] font-mono shrink-0">#{p.order}</span>
+                  )}
+                </div>
                 <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-4">{p.description}</p>
 
                 <div className="flex items-center justify-between">
@@ -297,6 +317,34 @@ export default function Projects() {
                   placeholder="https://..."
                   className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-700"
                 />
+              </div>
+
+              {/* Order + Featured */}
+              <div className="flex gap-3 items-end">
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-500 mb-1.5 font-mono">Orden</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={form.order === 999 ? "" : form.order}
+                    onChange={(e) => setForm({ ...form, order: e.target.value === "" ? 999 : Number(e.target.value) })}
+                    placeholder="1, 2, 3..."
+                    className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-700"
+                  />
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer pb-2">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={form.featured}
+                      onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                    />
+                    <div className={`w-10 h-5 rounded-full transition-colors ${form.featured ? "bg-violet-600" : "bg-gray-700"}`} />
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${form.featured ? "translate-x-5" : ""}`} />
+                  </div>
+                  <span className="text-xs text-gray-400 font-mono">Destacado</span>
+                </label>
               </div>
 
               {error && <p className="text-red-400 text-xs">{error}</p>}

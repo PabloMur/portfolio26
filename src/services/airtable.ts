@@ -16,6 +16,8 @@ export interface AirtableProject {
   descriptionEn: string;
   githubUrl: string;
   deployUrl: string;
+  featured: boolean;
+  order: number;
 }
 
 interface AirtableRecord {
@@ -42,6 +44,8 @@ function mapRecord(record: AirtableRecord): AirtableProject {
     image,
     githubUrl: record.fields.githubUrl || "",
     deployUrl: record.fields.deployUrl || "",
+    featured: record.fields.featured === true,
+    order: typeof record.fields.order === "number" ? record.fields.order : 999,
   };
 }
 
@@ -49,7 +53,11 @@ export async function fetchProjects(): Promise<AirtableProject[]> {
   const response = await fetch(BASE_URL, { headers: HEADERS });
   if (!response.ok) throw new Error(`Airtable error: ${response.status}`);
   const data = await response.json();
-  return data.records.map(mapRecord);
+  const projects: AirtableProject[] = data.records.map(mapRecord);
+  return projects.sort((a, b) => {
+    if (a.featured !== b.featured) return a.featured ? -1 : 1;
+    return a.order - b.order;
+  });
 }
 
 export async function createProject(

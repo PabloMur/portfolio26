@@ -75,6 +75,7 @@ export default function Projects() {
                   description={getDescription(project)}
                   githubUrl={project.githubUrl}
                   deployUrl={project.deployUrl}
+                  featured={project.featured}
                   onClick={() => setSelected(project)}
                 />
               ))}
