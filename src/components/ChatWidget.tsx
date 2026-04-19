@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { sendGroqMessage, type ProjectSummary } from "../services/groq";
 import { fetchProjects } from "../services/airtable";
+import { saveChatSession } from "../services/analyticsTracker";
 import {
   AiOutlineMessage,
   AiOutlineClose,
   AiOutlineSend,
 } from "react-icons/ai";
 import { useLanguage } from "../context/LanguageContext";
+
+const MAX_CHARS = 300;
 
 type Message = {
   role: "user" | "assistant";
@@ -93,6 +96,7 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const savedRef = useRef(false);
 
   useEffect(() => {
     fetchProjects()
@@ -111,14 +115,28 @@ export default function ChatWidget() {
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: INITIAL_MESSAGES[lang] }]);
+    savedRef.current = false;
   }, [lang]);
+
+  const saveSession = (msgs: Message[]) => {
+    if (savedRef.current) return;
+    if (msgs.some((m) => m.role === "user")) {
+      savedRef.current = true;
+      saveChatSession(msgs, lang);
+    }
+  };
+
+  const handleClose = () => {
+    saveSession(messages);
+    setOpen(false);
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
   const send = async () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || input.length > MAX_CHARS) return;
 
     const userMsg: Message = { role: "user", content: input.trim() };
     setMessages((prev) => [...prev, userMsg]);
@@ -152,7 +170,7 @@ export default function ChatWidget() {
               </div>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
               className="text-gray-600 hover:text-gray-300 transition-colors"
             >
               <AiOutlineClose size={18} />
@@ -194,22 +212,29 @@ export default function ChatWidget() {
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-gray-800 flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder={UI_TEXT[lang].placeholder}
-              className="flex-1 text-sm bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 outline-none text-gray-200 placeholder:text-gray-600 focus:border-violet-500 transition-colors"
-            />
-            <button
-              onClick={send}
-              disabled={loading || !input.trim()}
-              className="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 disabled:opacity-40 transition-colors"
-            >
-              <AiOutlineSend size={16} />
-            </button>
+          <div className="p-3 border-t border-gray-800 space-y-1.5">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value.slice(0, MAX_CHARS))}
+                onKeyDown={(e) => e.key === "Enter" && send()}
+                placeholder={UI_TEXT[lang].placeholder}
+                className="flex-1 text-sm bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 outline-none text-gray-200 placeholder:text-gray-600 focus:border-violet-500 transition-colors"
+              />
+              <button
+                onClick={send}
+                disabled={loading || !input.trim()}
+                className="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+              >
+                <AiOutlineSend size={16} />
+              </button>
+            </div>
+            {input.length > 0 && (
+              <p className={`text-right text-[10px] ${input.length >= MAX_CHARS ? "text-red-400" : "text-gray-600"}`}>
+                {input.length}/{MAX_CHARS}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -218,7 +243,7 @@ export default function ChatWidget() {
       <div className="chat-spin-wrapper shadow-lg shadow-violet-500/30">
         <div className="chat-spin-gradient" />
         <button
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => open ? handleClose() : setOpen(true)}
           className="relative z-10 w-13 h-13 bg-amber-50 text-gray-800 rounded-full hover:bg-amber-100 transition-colors flex items-center justify-center cursor-pointer p-3"
         >
           {open ? <AiOutlineClose size={22} /> : <AiOutlineMessage size={22} />}

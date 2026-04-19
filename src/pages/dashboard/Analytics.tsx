@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { fetchPageViews, type PageView } from "../../services/analyticsTracker";
-import { AiOutlineLoading3Quarters, AiOutlineDesktop, AiOutlineMobile, AiOutlineTablet } from "react-icons/ai";
+import { fetchPageViews, fetchChatSessions, type PageView, type ChatSession } from "../../services/analyticsTracker";
+import { AiOutlineLoading3Quarters, AiOutlineDesktop, AiOutlineMobile, AiOutlineTablet, AiOutlineMail, AiOutlineMessage } from "react-icons/ai";
 import { Timestamp } from "firebase/firestore";
 
 function timeAgo(ts: Timestamp): string {
@@ -24,11 +24,13 @@ function last7Days(): string[] {
 
 export default function Analytics() {
   const [views, setViews] = useState<PageView[]>([]);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPageViews()
-      .then(setViews)
+    Promise.all([fetchPageViews(), fetchChatSessions()])
+      .then(([v, s]) => { setViews(v); setSessions(s); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -208,6 +210,62 @@ export default function Analytics() {
                 <span className="text-gray-600 text-xs shrink-0">{timeAgo(v.timestamp)}</span>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Conversaciones del chat */}
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <AiOutlineMessage size={16} className="text-violet-400" />
+          <h2 className="text-white text-sm font-semibold">Conversaciones del asistente</h2>
+          <span className="ml-auto text-gray-600 text-xs">{sessions.length} total</span>
+        </div>
+        {sessions.length === 0 ? (
+          <p className="text-gray-600 text-xs">Sin conversaciones aún.</p>
+        ) : (
+          <div className="space-y-2">
+            {sessions.map((s) => {
+              const id = s.id!;
+              const isOpen = expandedSession === id;
+              const userMsgs = s.messages.filter((m) => m.role === "user");
+              const preview = userMsgs[0]?.content ?? "";
+              return (
+                <div key={id} className="border border-gray-800 rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => setExpandedSession(isOpen ? null : id)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-800/50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-gray-300 text-xs truncate">{preview || "—"}</p>
+                      <p className="text-gray-600 text-[10px] mt-0.5">{s.city}, {s.country} · {s.lang.toUpperCase()} · {userMsgs.length} msg{userMsgs.length !== 1 ? "s" : ""}</p>
+                    </div>
+                    {s.emailDetected && (
+                      <span className="flex items-center gap-1 text-emerald-400 text-[10px] font-semibold shrink-0">
+                        <AiOutlineMail size={12} />
+                        {s.email}
+                      </span>
+                    )}
+                    <span className="text-gray-600 text-[10px] shrink-0">{timeAgo(s.timestamp)}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 pb-4 space-y-2 border-t border-gray-800 pt-3">
+                      {s.messages.filter((m) => m.role !== "assistant" || s.messages.indexOf(m) > 0).map((m, i) => (
+                        <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                          <div className={`max-w-[85%] rounded-xl px-3 py-1.5 text-xs ${
+                            m.role === "user"
+                              ? "bg-indigo-600/30 text-indigo-200"
+                              : "bg-gray-800 text-gray-400"
+                          }`}>
+                            {m.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
