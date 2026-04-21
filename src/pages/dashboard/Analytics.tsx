@@ -29,9 +29,12 @@ export default function Analytics() {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([fetchPageViews(), fetchChatSessions()])
-      .then(([v, s]) => { setViews(v); setSessions(s); })
+    fetchPageViews()
+      .then(setViews)
       .finally(() => setLoading(false));
+    fetchChatSessions()
+      .then(setSessions)
+      .catch(() => {});
   }, []);
 
   if (loading) {
