@@ -118,6 +118,11 @@ export default function ChatWidget() {
     savedRef.current = false;
   }, [lang]);
 
+  const messagesRef = useRef(messages);
+  const langRef = useRef(lang);
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { langRef.current = lang; }, [lang]);
+
   const saveSession = (msgs: Message[]) => {
     if (savedRef.current) return;
     if (msgs.some((m) => m.role === "user")) {
@@ -130,6 +135,14 @@ export default function ChatWidget() {
     saveSession(messages);
     setOpen(false);
   };
+
+  useEffect(() => {
+    return () => {
+      if (!savedRef.current && messagesRef.current.some((m) => m.role === "user")) {
+        saveChatSession(messagesRef.current, langRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
