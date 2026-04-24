@@ -97,7 +97,7 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const savedRef = useRef(false);
+  const sessionDocId = useRef<string | undefined>(sessionStorage.getItem("chat_session_id") ?? undefined);
 
   useEffect(() => {
     if (sessionStorage.getItem("chat_nudge_shown")) return;
@@ -125,34 +125,13 @@ export default function ChatWidget() {
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: INITIAL_MESSAGES[lang] }]);
-    savedRef.current = false;
+    sessionDocId.current = undefined;
+    sessionStorage.removeItem("chat_session_id");
   }, [lang]);
 
-  const messagesRef = useRef(messages);
-  const langRef = useRef(lang);
-  useEffect(() => { messagesRef.current = messages; }, [messages]);
-  useEffect(() => { langRef.current = lang; }, [lang]);
-
-  const saveSession = (msgs: Message[]) => {
-    if (savedRef.current) return;
-    if (msgs.some((m) => m.role === "user")) {
-      savedRef.current = true;
-      saveChatSession(msgs, lang);
-    }
-  };
-
   const handleClose = () => {
-    saveSession(messages);
     setOpen(false);
   };
-
-  useEffect(() => {
-    return () => {
-      if (!savedRef.current && messagesRef.current.some((m) => m.role === "user")) {
-        saveChatSession(messagesRef.current, langRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -168,7 +147,14 @@ export default function ChatWidget() {
 
     try {
       const reply = await sendGroqMessage([...messages, userMsg], lang, projects);
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      const updatedMsgs = [...messages, userMsg, { role: "assistant" as const, content: reply }];
+      setMessages(updatedMsgs);
+      saveChatSession(updatedMsgs, lang, sessionDocId.current).then((id) => {
+        if (id) {
+          sessionDocId.current = id;
+          sessionStorage.setItem("chat_session_id", id);
+        }
+      });
     } catch {
       setMessages((prev) => [
         ...prev,

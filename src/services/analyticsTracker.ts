@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 export interface ChatSession {
@@ -67,8 +67,9 @@ const EMAIL_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;
 
 export async function saveChatSession(
   messages: { role: "user" | "assistant"; content: string }[],
-  lang: string
-): Promise<void> {
+  lang: string,
+  sessionDocId?: string
+): Promise<string | undefined> {
   try {
     const userMessages = messages.filter((m) => m.role === "user");
     if (userMessages.length === 0) return;
@@ -76,16 +77,27 @@ export async function saveChatSession(
     const allUserText = userMessages.map((m) => m.content).join(" ");
     const emailMatch = allUserText.match(EMAIL_REGEX);
 
-    const geo = await getGeo();
-    await addDoc(collection(db, "chatSessions"), {
+    const payload = {
       messages,
       emailDetected: !!emailMatch,
       email: emailMatch ? emailMatch[0] : "",
       lang,
-      ...geo,
       device: getDevice(),
+      updatedAt: Timestamp.now(),
+    };
+
+    if (sessionDocId) {
+      await updateDoc(doc(db, "chatSessions", sessionDocId), payload);
+      return sessionDocId;
+    }
+
+    const geo = await getGeo();
+    const ref = await addDoc(collection(db, "chatSessions"), {
+      ...payload,
+      ...geo,
       timestamp: Timestamp.now(),
     });
+    return ref.id;
   } catch (err) {
     console.error("[saveChatSession] error:", err);
   }
