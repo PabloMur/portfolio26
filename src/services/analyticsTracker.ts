@@ -14,6 +14,21 @@ export interface ChatSession {
   timestamp: Timestamp;
 }
 
+export interface ClickEvent {
+  id?: string;
+  page: string;
+  x: number;
+  y: number;
+  element: string;
+  label: string;
+  href: string;
+  country: string;
+  countryCode: string;
+  city: string;
+  device: "desktop" | "mobile" | "tablet";
+  timestamp: Timestamp;
+}
+
 export interface PageView {
   id?: string;
   page: string;
@@ -110,6 +125,51 @@ export async function fetchChatSessions(): Promise<ChatSession[]> {
     id: doc.id,
     ...(doc.data() as Omit<ChatSession, "id">),
   }));
+}
+
+export async function trackClick(
+  e: MouseEvent,
+  page: string
+): Promise<void> {
+  try {
+    const el = e.target as HTMLElement;
+    const interactive = el.closest("a, button, [role='button'], input, select, textarea");
+    if (!interactive) return;
+
+    const x = Math.round((e.clientX / window.innerWidth) * 100);
+    const y = Math.round(((e.clientY + window.scrollY) / document.documentElement.scrollHeight) * 100);
+    const label =
+      (interactive as HTMLElement).innerText?.trim().slice(0, 60) ||
+      interactive.getAttribute("aria-label") ||
+      interactive.getAttribute("title") ||
+      "";
+    const href = (interactive as HTMLAnchorElement).href || "";
+
+    const geo = await getGeo();
+    await addDoc(collection(db, "clickEvents"), {
+      page,
+      x,
+      y,
+      element: interactive.tagName.toLowerCase(),
+      label,
+      href,
+      ...geo,
+      device: getDevice(),
+      timestamp: Timestamp.now(),
+    });
+  } catch {
+    // Silently fail
+  }
+}
+
+export async function fetchClickEvents(page?: string): Promise<ClickEvent[]> {
+  const q = query(collection(db, "clickEvents"), orderBy("timestamp", "desc"));
+  const snapshot = await getDocs(q);
+  const all = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as Omit<ClickEvent, "id">),
+  }));
+  return page ? all.filter((c) => c.page === page) : all;
 }
 
 export async function fetchPageViews(): Promise<PageView[]> {

@@ -18,6 +18,8 @@ import Prompts from "./pages/dashboard/Prompts";
 import Docs from "./pages/dashboard/Docs";
 import Portfolio from "./pages/dashboard/Portfolio";
 import Analytics from "./pages/dashboard/Analytics";
+import Conversations from "./pages/dashboard/Conversations";
+import Heatmap from "./pages/dashboard/Heatmap";
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
       >
         <Route index element={<Overview />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="conversations" element={<Conversations />} />
+        <Route path="heatmap" element={<Heatmap />} />
         <Route path="projects" element={<DashboardProjects />} />
         <Route path="kanban" element={<Kanban />} />
         <Route path="ideas" element={<Ideas />} />
