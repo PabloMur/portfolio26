@@ -16,6 +16,7 @@ export interface ChatSession {
 
 export interface ClickEvent {
   id?: string;
+  type: "click" | "hover";
   page: string;
   x: number;
   y: number;
@@ -127,32 +128,19 @@ export async function fetchChatSessions(): Promise<ChatSession[]> {
   }));
 }
 
-export async function trackClick(
-  e: MouseEvent,
-  page: string
+async function saveEvent(
+  type: "click" | "hover",
+  x: number,
+  y: number,
+  page: string,
+  element = "",
+  label = "",
+  href = ""
 ): Promise<void> {
   try {
-    const el = e.target as HTMLElement;
-    const interactive = el.closest("a, button, [role='button'], input, select, textarea");
-    if (!interactive) return;
-
-    const x = Math.round((e.clientX / window.innerWidth) * 100);
-    const y = Math.round(((e.clientY + window.scrollY) / document.documentElement.scrollHeight) * 100);
-    const label =
-      (interactive as HTMLElement).innerText?.trim().slice(0, 60) ||
-      interactive.getAttribute("aria-label") ||
-      interactive.getAttribute("title") ||
-      "";
-    const href = (interactive as HTMLAnchorElement).href || "";
-
     const geo = await getGeo();
     await addDoc(collection(db, "clickEvents"), {
-      page,
-      x,
-      y,
-      element: interactive.tagName.toLowerCase(),
-      label,
-      href,
+      type, page, x, y, element, label, href,
       ...geo,
       device: getDevice(),
       timestamp: Timestamp.now(),
@@ -160,6 +148,23 @@ export async function trackClick(
   } catch {
     // Silently fail
   }
+}
+
+export async function trackClick(e: MouseEvent, page: string): Promise<void> {
+  const el = e.target as HTMLElement;
+  const interactive = el.closest("a, button, [role='button'], input, select, textarea");
+  if (!interactive) return;
+  const x = Math.round((e.clientX / window.innerWidth) * 100);
+  const y = Math.round(((e.clientY + window.scrollY) / document.documentElement.scrollHeight) * 100);
+  const label = (interactive as HTMLElement).innerText?.trim().slice(0, 60) || interactive.getAttribute("aria-label") || "";
+  const href = (interactive as HTMLAnchorElement).href || "";
+  saveEvent("click", x, y, page, interactive.tagName.toLowerCase(), label, href);
+}
+
+export function trackHover(e: MouseEvent, page: string): void {
+  const x = Math.round((e.clientX / window.innerWidth) * 100);
+  const y = Math.round(((e.clientY + window.scrollY) / document.documentElement.scrollHeight) * 100);
+  saveEvent("hover", x, y, page);
 }
 
 export async function fetchClickEvents(page?: string): Promise<ClickEvent[]> {

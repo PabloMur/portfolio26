@@ -4,7 +4,11 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const PAGES = ["/", "/projects", "/about", "/education", "/stack", "/services", "/contact"];
 
-function drawHeatmap(canvas: HTMLCanvasElement, points: { x: number; y: number }[]) {
+function drawHeatmap(
+  canvas: HTMLCanvasElement,
+  clicks: { x: number; y: number }[],
+  hovers: { x: number; y: number }[]
+) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   const w = canvas.width;
@@ -12,14 +16,27 @@ function drawHeatmap(canvas: HTMLCanvasElement, points: { x: number; y: number }
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = "#0f172a";
   ctx.fillRect(0, 0, w, h);
-  if (points.length === 0) return;
 
-  const radius = Math.max(w, h) * 0.08;
-  points.forEach(({ x, y }) => {
+  // Hovers — azul suave
+  hovers.forEach(({ x, y }) => {
+    const px = (x / 100) * w;
+    const py = (y / 100) * h;
+    const grad = ctx.createRadialGradient(px, py, 0, px, py, w * 0.05);
+    grad.addColorStop(0, "rgba(99,102,241,0.18)");
+    grad.addColorStop(1, "rgba(99,102,241,0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(px, py, w * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Clicks — violeta + rojo en zonas densas
+  const radius = Math.max(w, h) * 0.07;
+  clicks.forEach(({ x, y }) => {
     const px = (x / 100) * w;
     const py = (y / 100) * h;
     const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
-    grad.addColorStop(0, "rgba(167,139,250,0.4)");
+    grad.addColorStop(0, "rgba(167,139,250,0.5)");
     grad.addColorStop(1, "rgba(167,139,250,0)");
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -27,11 +44,12 @@ function drawHeatmap(canvas: HTMLCanvasElement, points: { x: number; y: number }
     ctx.fill();
   });
 
+  // Hot zones para clicks
   const cellSize = 5;
   const cols = Math.ceil(100 / cellSize);
   const rows = Math.ceil(100 / cellSize);
   const grid: number[][] = Array.from({ length: rows }, () => Array(cols).fill(0));
-  points.forEach(({ x, y }) => {
+  clicks.forEach(({ x, y }) => {
     const col = Math.min(Math.floor(x / cellSize), cols - 1);
     const row = Math.min(Math.floor(y / cellSize), rows - 1);
     grid[row][col]++;
@@ -54,40 +72,38 @@ function drawHeatmap(canvas: HTMLCanvasElement, points: { x: number; y: number }
   });
 }
 
-function HeatmapCanvas({ points, small }: { points: { x: number; y: number }[]; small?: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    if (canvasRef.current) drawHeatmap(canvasRef.current, points);
-  }, [points]);
-  return (
-    <canvas
-      ref={canvasRef}
-      width={small ? 300 : 600}
-      height={small ? 180 : 380}
-      className="w-full rounded-xl"
-    />
-  );
-}
-
 export default function Heatmap() {
-  const [clicks, setClicks] = useState<ClickEvent[]>([]);
+  const [allEvents, setAllEvents] = useState<ClickEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [page, setPage] = useState("/");
+  const [showHovers, setShowHovers] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     fetchClickEvents()
-      .then(setClicks)
+      .then(setAllEvents)
       .finally(() => setLoading(false));
   }, []);
 
-  const selectedClicks = selected ? clicks.filter((c) => c.page === selected) : [];
+  const pageEvents = allEvents.filter((c) => c.page === page);
+  const clicks = pageEvents.filter((c) => c.type === "click");
+  const hovers = pageEvents.filter((c) => c.type === "hover");
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    drawHeatmap(
+      canvasRef.current,
+      clicks.map((c) => ({ x: c.x, y: c.y })),
+      showHovers ? hovers.map((c) => ({ x: c.x, y: c.y })) : []
+    );
+  }, [clicks, hovers, showHovers]);
 
   const elementCounts: Record<string, number> = {};
-  selectedClicks.forEach((c) => {
+  clicks.forEach((c) => {
     const key = c.label || c.element || "—";
     elementCounts[key] = (elementCounts[key] || 0) + 1;
   });
-  const topElements = Object.entries(elementCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const topElements = Object.entries(elementCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
   return (
     <div className="p-8 space-y-6">
@@ -102,89 +118,101 @@ export default function Heatmap() {
         </div>
       ) : (
         <>
-          {/* Grilla de heatmaps por página */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {/* Selector de páginas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {PAGES.map((p) => {
-              const pageClicks = clicks.filter((c) => c.page === p);
-              const isSelected = selected === p;
+              const count = allEvents.filter((c) => c.page === p && c.type === "click").length;
               return (
                 <button
                   key={p}
-                  onClick={() => setSelected(isSelected ? null : p)}
-                  className={`rounded-2xl overflow-hidden border transition-all text-left ${
-                    isSelected
-                      ? "border-violet-500 shadow-lg shadow-violet-500/20"
-                      : "border-gray-800 hover:border-gray-600"
+                  onClick={() => setPage(p)}
+                  className={`rounded-2xl p-4 text-left transition-colors border ${
+                    page === p
+                      ? "bg-indigo-600/20 border-indigo-500/50"
+                      : "bg-gray-900 border-gray-800 hover:border-gray-700"
                   }`}
                 >
-                  <HeatmapCanvas
-                    points={pageClicks.map((c) => ({ x: c.x, y: c.y }))}
-                    small
-                  />
-                  <div className="bg-gray-900 px-3 py-2 flex items-center justify-between">
-                    <span className="text-gray-400 text-xs font-mono">{p}</span>
-                    <span className={`text-xs font-semibold ${pageClicks.length > 0 ? "text-violet-400" : "text-gray-700"}`}>
-                      {pageClicks.length} clicks
-                    </span>
-                  </div>
+                  <p className="text-gray-500 text-xs font-mono mb-1 truncate">{p}</p>
+                  <p className="text-white text-2xl font-bold">{count}</p>
+                  <p className="text-gray-600 text-[10px]">clicks</p>
                 </button>
               );
             })}
           </div>
 
-          {/* Detalle de la página seleccionada */}
-          {selected && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-white text-sm font-semibold">
-                    Detalle — <span className="text-violet-400 font-mono">{selected}</span>
-                  </h2>
-                  <span className="text-gray-600 text-xs">{selectedClicks.length} clicks</span>
-                </div>
-                <HeatmapCanvas points={selectedClicks.map((c) => ({ x: c.x, y: c.y }))} />
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <h2 className="text-white text-sm font-semibold mb-4">Más clickeados</h2>
-                  {topElements.length === 0 ? (
-                    <p className="text-gray-600 text-xs">Sin datos aún.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {topElements.map(([label, count], i) => (
-                        <div key={i}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-gray-300 text-xs truncate flex-1 mr-2">{label}</span>
-                            <span className="text-gray-500 text-xs shrink-0">{count}</span>
-                          </div>
-                          <div className="w-full bg-gray-800 rounded-full h-1">
-                            <div
-                              className="bg-violet-500 h-1 rounded-full"
-                              style={{ width: `${(count / topElements[0][1]) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <h2 className="text-white text-sm font-semibold mb-3">Últimos clicks</h2>
-                  <div className="space-y-1.5">
-                    {selectedClicks.slice(0, 8).map((c, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs">
-                        <span className="text-violet-400 shrink-0 w-10">{c.element}</span>
-                        <span className="text-gray-300 flex-1 truncate">{c.label || "—"}</span>
-                        <span className="text-gray-600 shrink-0 font-mono">{c.x}%,{c.y}%</span>
-                      </div>
-                    ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Canvas */}
+            <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-white text-sm font-semibold">
+                  <span className="text-violet-400 font-mono">{page}</span>
+                </h2>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 text-[10px]">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-violet-400 inline-block" />
+                      <span className="text-gray-500">clicks ({clicks.length})</span>
+                    </span>
+                    <button
+                      onClick={() => setShowHovers((v) => !v)}
+                      className={`flex items-center gap-1 transition-opacity ${showHovers ? "opacity-100" : "opacity-40"}`}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
+                      <span className="text-gray-500">hover ({hovers.length})</span>
+                    </button>
                   </div>
                 </div>
               </div>
+              <canvas ref={canvasRef} width={600} height={400} className="w-full rounded-xl" />
+              {pageEvents.length === 0 && (
+                <p className="text-gray-600 text-xs text-center mt-4">Sin datos para esta página aún.</p>
+              )}
             </div>
-          )}
+
+            {/* Top elementos */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+              <h2 className="text-white text-sm font-semibold mb-4">Elementos más clickeados</h2>
+              {topElements.length === 0 ? (
+                <p className="text-gray-600 text-xs">Sin datos aún.</p>
+              ) : (
+                <div className="space-y-3">
+                  {topElements.map(([label, count], i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gray-300 text-xs truncate flex-1 mr-2">{label}</span>
+                        <span className="text-gray-500 text-xs shrink-0">{count}</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-1">
+                        <div
+                          className="bg-violet-500 h-1 rounded-full"
+                          style={{ width: `${(count / topElements[0][1]) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Últimos clicks */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <h2 className="text-white text-sm font-semibold mb-4">Últimos clicks — {page}</h2>
+            {clicks.length === 0 ? (
+              <p className="text-gray-600 text-xs">Sin datos aún.</p>
+            ) : (
+              <div className="space-y-1">
+                {clicks.slice(0, 15).map((c, i) => (
+                  <div key={i} className="flex items-center gap-4 py-1.5 border-b border-gray-800 last:border-0 text-xs">
+                    <span className="text-gray-500 font-mono w-16 shrink-0">{c.x}%, {c.y}%</span>
+                    <span className="text-violet-400 shrink-0">{c.element}</span>
+                    <span className="text-gray-300 flex-1 truncate">{c.label || "—"}</span>
+                    <span className="text-gray-600 shrink-0">{c.city}, {c.country}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

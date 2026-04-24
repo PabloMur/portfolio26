@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import PulseBorderLink from "./ui/PulseBorderLink";
 import Logo from "./Logo";
@@ -12,8 +12,10 @@ import {
     AiOutlineMenu,
     AiOutlineClose,
     AiOutlineShop,
+    AiOutlineDownload,
 } from "react-icons/ai";
 import { useLanguage } from "../context/LanguageContext";
+import { fetchActiveCV } from "../services/cv";
 
 const navIcons = {
     "/": <AiOutlineHome />,
@@ -27,8 +29,13 @@ const navIcons = {
 
 export const Sidebar = () => {
     const [open, setOpen] = useState(false);
+    const [cvUrl, setCvUrl] = useState<string | null>(null);
     const { t, lang, toggleLang } = useLanguage();
     const { pathname } = useLocation();
+
+    useEffect(() => {
+        fetchActiveCV().then((cv) => { if (cv) setCvUrl(cv.url); }).catch(() => {});
+    }, []);
 
     const links = [
         { to: "/", label: t.nav.home },
@@ -74,6 +81,17 @@ export const Sidebar = () => {
                     </nav>
 
                     <div className="flex items-center gap-3">
+                        {cvUrl && (
+                            <a
+                                href={cvUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="hidden items-center gap-1.5 rounded-lg border border-violet-500/40 bg-violet-500/10 px-3 py-1.5 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20 sm:flex"
+                            >
+                                <AiOutlineDownload size={14} />
+                                CV
+                            </a>
+                        )}
                         <button
                             onClick={toggleLang}
                             className="hidden items-center gap-1 rounded-lg border border-gray-700 bg-white/5 px-3 py-1.5 text-sm font-medium transition-colors hover:border-indigo-400/50 hover:bg-white/8 sm:flex"
@@ -152,9 +170,20 @@ export const Sidebar = () => {
                     })}
                 </nav>
 
+                {cvUrl && (
+                    <a
+                        href={cvUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/10 px-3 py-3 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20"
+                    >
+                        <AiOutlineDownload size={16} />
+                        Descargar CV
+                    </a>
+                )}
                 <button
                     onClick={toggleLang}
-                    className="mt-6 flex items-center justify-center gap-1 rounded-xl border border-gray-700 bg-white/5 px-3 py-3 text-sm font-medium transition-colors hover:border-indigo-400/50 hover:bg-white/8"
+                    className="mt-3 flex items-center justify-center gap-1 rounded-xl border border-gray-700 bg-white/5 px-3 py-3 text-sm font-medium transition-colors hover:border-indigo-400/50 hover:bg-white/8"
                 >
                     <span className={lang === "en" ? "text-white font-semibold" : "text-gray-500"}>EN</span>
                     <span className="mx-0.5 text-gray-300">|</span>

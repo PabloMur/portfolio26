@@ -13,6 +13,7 @@ import {
   AiOutlineBarChart,
   AiOutlineMessage,
   AiOutlineHeatMap,
+  AiOutlineFilePdf,
 } from "react-icons/ai";
 
 const NAV_ITEMS = [
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { to: "/dashboard/analytics", label: "Analytics", icon: <AiOutlineBarChart size={18} /> },
   { to: "/dashboard/conversations", label: "Conversaciones", icon: <AiOutlineMessage size={18} /> },
   { to: "/dashboard/heatmap", label: "Heatmap", icon: <AiOutlineHeatMap size={18} /> },
+  { to: "/dashboard/cv", label: "CV", icon: <AiOutlineFilePdf size={18} /> },
   { to: "/dashboard/projects", label: "Proyectos", icon: <AiOutlineProject size={18} /> },
   { to: "/dashboard/kanban", label: "Kanban", icon: <AiOutlineUnorderedList size={18} /> },
   { to: "/dashboard/ideas", label: "Ideas", icon: <AiOutlineBulb size={18} /> },
