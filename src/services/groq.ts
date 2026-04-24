@@ -109,17 +109,26 @@ function buildProjectsSection(projects: ProjectSummary[]): string {
   return `\n\n---\n\nPORTFOLIO PROJECTS (live from database)\n\n${list}`;
 }
 
+function buildCVSection(cvUrl: string): string {
+  return `\n\n---\n\nCV / RESUME\n\nIf the user asks for Pablo's CV, resume, or curriculum vitae, share this direct download link: ${cvUrl}\nTell them they can download it directly from that link.`;
+}
+
 export async function sendGroqMessage(
   messages: Message[],
   lang: "en" | "es" = "en",
-  projects: ProjectSummary[] = []
+  projects: ProjectSummary[] = [],
+  cvUrl?: string
 ): Promise<string> {
   const langInstruction =
     lang === "es"
       ? "\n\nIMPORTANT: You MUST respond in Spanish. Always."
       : "\n\nIMPORTANT: You MUST respond in English. Always.";
 
-  const fullPrompt = SYSTEM_PROMPT + buildProjectsSection(projects) + langInstruction;
+  const fullPrompt =
+    SYSTEM_PROMPT +
+    buildProjectsSection(projects) +
+    (cvUrl ? buildCVSection(cvUrl) : "") +
+    langInstruction;
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",

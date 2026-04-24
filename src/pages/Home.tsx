@@ -1,10 +1,17 @@
-import { AiOutlineGithub, AiFillLinkedin, AiOutlineArrowRight } from "react-icons/ai";
+import { useState, useEffect } from "react";
+import { AiOutlineGithub, AiFillLinkedin, AiOutlineArrowRight, AiOutlineDownload } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { fetchActiveCV } from "../services/cv";
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const h = t.home;
+  const [cvUrl, setCvUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchActiveCV().then((cv) => { if (cv) setCvUrl(cv.url); }).catch(() => {});
+  }, []);
 
   return (
     <section className="relative flex min-h-[calc(100svh-5rem)] items-center justify-center overflow-hidden bg-gray-950 px-6 py-12 sm:py-10 md:px-12 lg:px-16 lg:py-6">
@@ -78,6 +85,17 @@ export default function Home() {
               {h.ctaPrimary}
               <AiOutlineArrowRight />
             </Link>
+            {cvUrl && (
+              <a
+                href={cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-violet-500/50 bg-violet-500/10 px-6 py-3 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20 col-span-2 sm:col-span-1"
+              >
+                <AiOutlineDownload className="text-base" />
+                {lang === "es" ? "Descargar CV" : "Download CV"}
+              </a>
+            )}
           </div>
 
           {/* Stats */}

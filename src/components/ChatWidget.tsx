@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { sendGroqMessage, type ProjectSummary } from "../services/groq";
 import { fetchProjects } from "../services/airtable";
 import { saveChatSession } from "../services/analyticsTracker";
+import { fetchActiveCV } from "../services/cv";
 import {
   AiOutlineMessage,
   AiOutlineClose,
@@ -96,6 +97,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [cvUrl, setCvUrl] = useState<string | undefined>(undefined);
   const bottomRef = useRef<HTMLDivElement>(null);
   const sessionDocId = useRef<string | undefined>(sessionStorage.getItem("chat_session_id") ?? undefined);
 
@@ -121,6 +123,7 @@ export default function ChatWidget() {
         )
       )
       .catch(() => {});
+    fetchActiveCV().then((cv) => { if (cv) setCvUrl(cv.url); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -146,7 +149,7 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      const reply = await sendGroqMessage([...messages, userMsg], lang, projects);
+      const reply = await sendGroqMessage([...messages, userMsg], lang, projects, cvUrl);
       const updatedMsgs = [...messages, userMsg, { role: "assistant" as const, content: reply }];
       setMessages(updatedMsgs);
       saveChatSession(updatedMsgs, lang, sessionDocId.current).then((id) => {
