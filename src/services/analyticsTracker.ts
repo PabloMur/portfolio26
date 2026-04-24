@@ -86,8 +86,8 @@ export async function saveChatSession(
       device: getDevice(),
       timestamp: Timestamp.now(),
     });
-  } catch {
-    // Silently fail
+  } catch (err) {
+    console.error("[saveChatSession] error:", err);
   }
 }
 

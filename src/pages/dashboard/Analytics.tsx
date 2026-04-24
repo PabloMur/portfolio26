@@ -33,8 +33,8 @@ export default function Analytics() {
       .then(setViews)
       .finally(() => setLoading(false));
     fetchChatSessions()
-      .then(setSessions)
-      .catch(() => {});
+      .then((s) => { console.log("[Analytics] chatSessions:", s); setSessions(s); })
+      .catch((err) => console.error("[Analytics] fetchChatSessions error:", err));
   }, []);
 
   if (loading) {

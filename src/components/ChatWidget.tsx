@@ -22,8 +22,8 @@ const INITIAL_MESSAGES = {
 };
 
 const UI_TEXT = {
-  en: { header: "Pablo's Assistant", subheader: "Ask about his profile", placeholder: "Ask something..." },
-  es: { header: "Asistente de Pablo", subheader: "Preguntá sobre su perfil", placeholder: "Escribe algo..." },
+  en: { header: "Pablo's Assistant", subheader: "Ask about his profile", placeholder: "Ask something...", nudge: "👋 Want to know more about Pablo?" },
+  es: { header: "Asistente de Pablo", subheader: "Preguntá sobre su perfil", placeholder: "Escribe algo...", nudge: "👋 ¿Querés saber más sobre Pablo?" },
 };
 
 function renderInline(text: string): React.ReactNode[] {
@@ -89,6 +89,7 @@ function FormattedMessage({ content }: { content: string }) {
 export default function ChatWidget() {
   const { lang } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [nudge, setNudge] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: INITIAL_MESSAGES[lang] },
   ]);
@@ -97,6 +98,15 @@ export default function ChatWidget() {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const savedRef = useRef(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("chat_nudge_shown")) return;
+    const t = setTimeout(() => {
+      setNudge(true);
+      sessionStorage.setItem("chat_nudge_shown", "1");
+    }, 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     fetchProjects()
@@ -252,11 +262,24 @@ export default function ChatWidget() {
         </div>
       )}
 
+      {/* Nudge bubble */}
+      {nudge && !open && (
+        <div className="animate-fade-in-up flex items-center gap-2 bg-gray-900 border border-gray-700 text-gray-200 text-sm px-4 py-2.5 rounded-2xl rounded-br-sm shadow-xl max-w-[220px]">
+          <span>{UI_TEXT[lang].nudge}</span>
+          <button
+            onClick={() => setNudge(false)}
+            className="text-gray-600 hover:text-gray-400 transition-colors shrink-0 ml-1"
+          >
+            <AiOutlineClose size={13} />
+          </button>
+        </div>
+      )}
+
       {/* Toggle button */}
       <div className="chat-spin-wrapper shadow-lg shadow-violet-500/30">
         <div className="chat-spin-gradient" />
         <button
-          onClick={() => open ? handleClose() : setOpen(true)}
+          onClick={() => { setNudge(false); open ? handleClose() : setOpen(true); }}
           className="relative z-10 w-13 h-13 bg-amber-50 text-gray-800 rounded-full hover:bg-amber-100 transition-colors flex items-center justify-center cursor-pointer p-3"
         >
           {open ? <AiOutlineClose size={22} /> : <AiOutlineMessage size={22} />}
