@@ -159,9 +159,8 @@ export default function CVManager() {
 
                 <div className="flex items-center gap-2">
                   <a
-                    href={cv.url}
-                    target="_blank"
-                    rel="noreferrer"
+                    href={cv.url.replace("/raw/upload/", "/raw/upload/fl_attachment/")}
+                    download={`${cv.name}.pdf`}
                     className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
                     title="Descargar"
                   >
