@@ -20,6 +20,7 @@ import {
   AiOutlineLoading3Quarters,
   AiOutlineDelete,
   AiOutlineProject,
+  AiOutlineDown,
 } from "react-icons/ai";
 
 const COLUMNS: { id: KanbanStatus; label: string; color: string }[] = [
@@ -57,6 +58,7 @@ export default function Kanban() {
   const [editingCard, setEditingCard] = useState<KanbanCard | null>(null);
   const [cardForm, setCardForm] = useState<CardForm>(EMPTY_FORM);
   const [savingCard, setSavingCard] = useState(false);
+  const [cardsError, setCardsError] = useState("");
 
   useEffect(() => {
     fetchKanbanProjects()
@@ -70,8 +72,13 @@ export default function Kanban() {
   useEffect(() => {
     if (!selectedProject) return;
     setLoadingCards(true);
+    setCardsError("");
     fetchCards(selectedProject.id)
       .then(setCards)
+      .catch((err) => {
+        console.error("fetchCards error:", err);
+        setCardsError(err?.message ?? "Error al cargar las tarjetas.");
+      })
       .finally(() => setLoadingCards(false));
   }, [selectedProject]);
 
@@ -175,9 +182,9 @@ export default function Kanban() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Projects sidebar */}
-      <aside className="w-52 border-r border-gray-800 flex flex-col shrink-0 bg-gray-950">
+    <div className="flex flex-col md:flex-row md:h-screen overflow-hidden">
+      {/* Desktop projects sidebar */}
+      <aside className="hidden md:flex w-52 border-r border-gray-800 flex-col shrink-0 bg-gray-950">
         <div className="px-4 py-5 border-b border-gray-800">
           <p className="text-xs text-violet-400 font-mono tracking-widest uppercase">Proyectos</p>
         </div>
@@ -256,18 +263,84 @@ export default function Kanban() {
         </div>
       </aside>
 
+      {/* Mobile project selector bar */}
+      <div className="md:hidden border-b border-gray-800 bg-gray-950 shrink-0 px-4 py-3 space-y-2">
+        {showProjectInput ? (
+          <div className="flex gap-2">
+            <input
+              autoFocus
+              type="text"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateProject();
+                if (e.key === "Escape") setShowProjectInput(false);
+              }}
+              placeholder="Nombre del proyecto"
+              className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-600"
+            />
+            <button
+              onClick={() => setShowProjectInput(false)}
+              className="px-3 py-2 rounded-lg text-xs text-gray-500 bg-gray-800 hover:bg-gray-700 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleCreateProject}
+              disabled={addingProject || !newProjectName.trim()}
+              className="px-3 py-2 rounded-lg text-xs text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition-colors"
+            >
+              {addingProject ? <AiOutlineLoading3Quarters className="animate-spin" /> : "Crear"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <select
+                value={selectedProject?.id ?? ""}
+                onChange={(e) => {
+                  const p = projects.find((x) => x.id === e.target.value);
+                  if (p) setSelectedProject(p);
+                }}
+                className="w-full appearance-none bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors pr-8"
+              >
+                {loadingProjects && <option>Cargando...</option>}
+                {!loadingProjects && projects.length === 0 && <option value="">Sin proyectos</option>}
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <AiOutlineDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+            </div>
+            <button
+              onClick={() => setShowProjectInput(true)}
+              className="p-2.5 rounded-xl bg-gray-900 border border-gray-800 text-gray-400 hover:text-white hover:border-indigo-500 active:bg-gray-800 transition-colors shrink-0"
+              title="Nuevo proyecto"
+            >
+              <AiOutlinePlus size={18} />
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Board */}
-      <div className="flex-1 overflow-x-auto p-6">
+      <div className="flex-1 overflow-x-auto overflow-y-auto p-4 md:p-6">
         {!selectedProject ? (
-          <div className="flex items-center justify-center h-full text-gray-600 text-sm">
+          <div className="flex items-center justify-center h-40 md:h-full text-gray-600 text-sm">
             Seleccioná o creá un proyecto para empezar.
           </div>
         ) : (
           <>
-            <div className="mb-6">
+            <div className="mb-4 md:mb-6">
               <p className="text-violet-400 font-mono text-xs tracking-widest uppercase mb-1">Kanban</p>
               <h1 className="text-xl font-bold text-white">{selectedProject.name}</h1>
             </div>
+
+            {cardsError && (
+              <p className="text-red-400 text-sm mb-4 bg-red-900/20 border border-red-800 rounded-xl px-4 py-3 font-mono break-all">
+                {cardsError}
+              </p>
+            )}
 
             {loadingCards ? (
               <div className="flex justify-center py-20">
@@ -275,11 +348,11 @@ export default function Kanban() {
               </div>
             ) : (
               <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex gap-4 items-start">
+                <div className="flex gap-3 md:gap-4 items-start">
                   {COLUMNS.map((col) => {
                     const colCards = columnCards(col.id);
                     return (
-                      <div key={col.id} className="w-72 shrink-0">
+                      <div key={col.id} className="w-[80vw] sm:w-72 md:w-72 shrink-0">
                         <div className="flex items-center justify-between mb-3 px-1">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-semibold ${col.color}`}>{col.label}</span>
@@ -289,7 +362,7 @@ export default function Kanban() {
                           </div>
                           <button
                             onClick={() => openCreateCard(col.id)}
-                            className="text-gray-600 hover:text-white transition-colors"
+                            className="text-gray-600 hover:text-white transition-colors p-1"
                           >
                             <AiOutlinePlus size={16} />
                           </button>
@@ -357,13 +430,13 @@ export default function Kanban() {
 
       {/* Card modal */}
       {showCardModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
               <h2 className="text-white font-semibold text-sm">
                 {editingCard ? "Editar tarea" : "Nueva tarea"}
               </h2>
-              <button onClick={() => setShowCardModal(false)} className="text-gray-500 hover:text-white transition-colors">
+              <button onClick={() => setShowCardModal(false)} className="text-gray-500 hover:text-white transition-colors p-1">
                 <AiOutlineClose size={18} />
               </button>
             </div>
@@ -377,7 +450,7 @@ export default function Kanban() {
                   value={cardForm.title}
                   onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && handleSaveCard()}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
 
@@ -387,7 +460,7 @@ export default function Kanban() {
                   rows={3}
                   value={cardForm.description}
                   onChange={(e) => setCardForm({ ...cardForm, description: e.target.value })}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors resize-none"
+                  className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors resize-none"
                 />
               </div>
 
@@ -398,7 +471,7 @@ export default function Kanban() {
                     <button
                       key={p}
                       onClick={() => setCardForm({ ...cardForm, priority: p })}
-                      className={`flex-1 py-1.5 rounded-lg text-xs transition-colors ${
+                      className={`flex-1 py-2 rounded-lg text-xs transition-colors ${
                         cardForm.priority === p
                           ? PRIORITY_STYLES[p]
                           : "bg-gray-800 text-gray-500 hover:text-gray-300"
@@ -410,25 +483,25 @@ export default function Kanban() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-1">
+              <div className="flex gap-2 pt-1 pb-safe">
                 {editingCard && (
                   <button
                     onClick={() => handleDeleteCard(editingCard.id)}
-                    className="p-2 rounded-xl text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors"
+                    className="p-3 rounded-xl text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors"
                   >
-                    <AiOutlineDelete size={16} />
+                    <AiOutlineDelete size={18} />
                   </button>
                 )}
                 <button
                   onClick={() => setShowCardModal(false)}
-                  className="flex-1 py-2 rounded-xl text-sm text-gray-400 bg-gray-800 hover:bg-gray-700 transition-colors"
+                  className="flex-1 py-3 rounded-xl text-sm text-gray-400 bg-gray-800 hover:bg-gray-700 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSaveCard}
                   disabled={savingCard || !cardForm.title.trim()}
-                  className="flex-1 py-2 rounded-xl text-sm text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl text-sm text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 >
                   {savingCard && <AiOutlineLoading3Quarters size={14} className="animate-spin" />}
                   {editingCard ? "Guardar" : "Crear"}

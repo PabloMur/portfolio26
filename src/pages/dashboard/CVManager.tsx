@@ -76,14 +76,14 @@ export default function CVManager() {
   };
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
       <div>
         <p className="text-violet-400 font-mono text-xs tracking-widest uppercase mb-1">Dashboard</p>
         <h1 className="text-2xl font-bold text-white">CV</h1>
       </div>
 
       {/* Upload */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 space-y-4">
         <h2 className="text-white text-sm font-semibold">Subir nuevo CV</h2>
 
         <div>
@@ -93,17 +93,17 @@ export default function CVManager() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="CV Pablo Murillo - 2026"
-            className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-700"
+            className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none focus:border-indigo-500 transition-colors placeholder:text-gray-700"
           />
         </div>
 
         <div
           onClick={() => fileRef.current?.click()}
-          className="cursor-pointer border border-dashed border-gray-700 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-indigo-500 transition-colors"
+          className="cursor-pointer border border-dashed border-gray-700 rounded-xl p-6 flex flex-col items-center gap-2 hover:border-indigo-500 active:border-indigo-400 transition-colors"
         >
           <AiOutlineFilePdf size={28} className={file ? "text-violet-400" : "text-gray-600"} />
-          <span className="text-xs text-gray-500">
-            {file ? file.name : "Click para seleccionar un PDF"}
+          <span className="text-xs text-gray-500 text-center">
+            {file ? file.name : "Tocá para seleccionar un PDF"}
           </span>
           <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
         </div>
@@ -113,7 +113,7 @@ export default function CVManager() {
         <button
           onClick={handleUpload}
           disabled={uploading || !file}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+          className="flex items-center justify-center gap-2 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors"
         >
           {uploading
             ? <><AiOutlineLoading3Quarters size={15} className="animate-spin" /> Subiendo...</>
@@ -123,7 +123,7 @@ export default function CVManager() {
       </div>
 
       {/* Lista */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6">
         <h2 className="text-white text-sm font-semibold mb-4">Mis CVs</h2>
 
         {loading ? (
@@ -137,7 +137,7 @@ export default function CVManager() {
             {cvs.map((cv) => (
               <div
                 key={cv.id}
-                className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${
+                className={`flex items-center gap-3 p-4 rounded-xl border transition-colors ${
                   cv.active
                     ? "border-violet-500/50 bg-violet-500/5"
                     : "border-gray-800 bg-gray-950"
@@ -146,7 +146,7 @@ export default function CVManager() {
                 <AiOutlineFilePdf size={22} className={cv.active ? "text-violet-400" : "text-gray-600"} />
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-white text-sm font-medium truncate">{cv.name}</p>
                     {cv.active && (
                       <span className="text-[10px] bg-violet-600/30 text-violet-300 px-2 py-0.5 rounded-full font-semibold shrink-0">
@@ -157,35 +157,35 @@ export default function CVManager() {
                   <p className="text-gray-600 text-xs mt-0.5">{timeAgo(cv.uploadedAt)}</p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <a
                     href={cv.url.replace("/raw/upload/", "/raw/upload/fl_attachment/")}
                     download={`${cv.name}.pdf`}
-                    className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
+                    className="p-3 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 active:bg-gray-700 transition-colors"
                     title="Descargar"
                   >
-                    <AiOutlineDownload size={16} />
+                    <AiOutlineDownload size={18} />
                   </a>
                   <button
                     onClick={() => handleSetActive(cv.id!)}
                     disabled={cv.active || settingId === cv.id}
-                    className="p-2 rounded-lg text-gray-500 hover:text-violet-400 hover:bg-gray-800 transition-colors disabled:opacity-30"
+                    className="p-3 rounded-lg text-gray-500 hover:text-violet-400 hover:bg-gray-800 active:bg-gray-700 transition-colors disabled:opacity-30"
                     title="Marcar como activo"
                   >
                     {settingId === cv.id
-                      ? <AiOutlineLoading3Quarters size={16} className="animate-spin" />
-                      : <AiOutlineCheck size={16} />
+                      ? <AiOutlineLoading3Quarters size={18} className="animate-spin" />
+                      : <AiOutlineCheck size={18} />
                     }
                   </button>
                   <button
                     onClick={() => handleDelete(cv.id!)}
                     disabled={deletingId === cv.id}
-                    className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors disabled:opacity-30"
+                    className="p-3 rounded-lg text-gray-500 hover:text-red-400 hover:bg-gray-800 active:bg-gray-700 transition-colors disabled:opacity-30"
                     title="Eliminar"
                   >
                     {deletingId === cv.id
-                      ? <AiOutlineLoading3Quarters size={16} className="animate-spin" />
-                      : <AiOutlineDelete size={16} />
+                      ? <AiOutlineLoading3Quarters size={18} className="animate-spin" />
+                      : <AiOutlineDelete size={18} />
                     }
                   </button>
                 </div>
