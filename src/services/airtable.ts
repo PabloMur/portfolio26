@@ -68,7 +68,11 @@ export async function createProject(
     headers: HEADERS,
     body: JSON.stringify({ fields }),
   });
-  if (!response.ok) throw new Error(`Airtable error: ${response.status}`);
+  if (!response.ok) {
+    const errBody = await response.json().catch(() => ({}));
+    console.error("Airtable createProject error:", errBody);
+    throw new Error(`Airtable error: ${response.status}`);
+  }
   const data = await response.json();
   return mapRecord(data);
 }

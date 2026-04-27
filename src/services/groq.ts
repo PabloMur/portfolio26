@@ -113,6 +113,32 @@ function buildCVSection(cvUrl: string): string {
   return `\n\n---\n\nCV / RESUME\n\nIf the user asks for Pablo's CV, resume, or curriculum vitae, share this direct download link: ${cvUrl}\nTell them they can download it directly from that link.`;
 }
 
+export async function translateToEnglish(text: string): Promise<string> {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a professional translator. Translate the given text from Spanish to English. Return ONLY the translated text, no explanations, no quotes.",
+        },
+        { role: "user", content: text },
+      ],
+      max_tokens: 200,
+      temperature: 0.2,
+    }),
+  });
+  if (!response.ok) throw new Error(`Groq API error: ${response.status}`);
+  const data = await response.json();
+  return data.choices[0].message.content as string;
+}
+
 export async function sendGroqMessage(
   messages: Message[],
   lang: "en" | "es" = "en",
