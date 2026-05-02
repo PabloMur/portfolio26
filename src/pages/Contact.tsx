@@ -23,27 +23,27 @@ export default function Contact() {
           {t.contact.title}
         </h1>
 
-        <div className="flex flex-col items-center gap-8 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-          <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-8 animate-fade-in-up w-full max-w-xs sm:max-w-none" style={{ animationDelay: "0.4s" }}>
+          <div className="flex flex-col items-center gap-3 w-full sm:w-auto">
             <p className="text-gray-400 text-base md:text-lg">{t.contact.linkedinText}</p>
             <a
               href="https://www.linkedin.com/in/pablo-nicolas-murillo/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 text-white bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 w-fit hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all"
+              className="flex items-center justify-center gap-3 text-white bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 w-full sm:w-fit hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all"
             >
               <AiFillLinkedin className="text-2xl text-blue-500" />
               <span className="font-medium">LinkedIn</span>
             </a>
           </div>
 
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-3 w-full sm:w-auto">
             <p className="text-gray-400 text-base md:text-lg">{t.contact.emailText}</p>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-3 text-white bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 w-fit hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all cursor-pointer text-sm md:text-base"
+              className="flex items-center justify-between gap-3 text-white bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 w-full sm:w-fit hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition-all cursor-pointer text-sm md:text-base"
             >
-              <span className="font-medium">{email}</span>
+              <span className="font-medium truncate">{email}</span>
               {copied ? (
                 <AiOutlineCheck className="text-lg text-green-400" />
               ) : (

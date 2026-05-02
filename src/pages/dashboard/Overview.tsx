@@ -19,9 +19,9 @@ const MODULES = [
 
 export default function Overview() {
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <p className="text-violet-400 font-mono text-xs tracking-widest uppercase mb-2">Panel principal</p>
-      <h1 className="text-2xl font-bold text-white mb-8">Overview</h1>
+      <h1 className="text-2xl font-bold text-white mb-6 sm:mb-8">Overview</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {MODULES.map((m) => (

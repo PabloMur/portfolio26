@@ -93,7 +93,7 @@ export default function Analytics() {
   const totalDevices = last30.length || 1;
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
       <div>
         <p className="text-violet-400 font-mono text-xs tracking-widest uppercase mb-1">Dashboard</p>
         <h1 className="text-2xl font-bold text-white">Analytics</h1>
@@ -207,9 +207,9 @@ export default function Analytics() {
         ) : (
           <div className="space-y-2">
             {views.slice(0, 10).map((v, i) => (
-              <div key={v.id ?? i} className="flex items-center gap-4 py-2 border-b border-gray-800 last:border-0">
+              <div key={v.id ?? i} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-0">
                 <span className="text-gray-300 text-xs font-mono flex-1 truncate">{v.page || "/"}</span>
-                <span className="text-gray-500 text-xs">{v.city}, {v.country}</span>
+                <span className="text-gray-500 text-xs hidden sm:block shrink-0">{v.city}, {v.country}</span>
                 <span className="text-gray-600 text-xs shrink-0">{timeAgo(v.timestamp)}</span>
               </div>
             ))}
@@ -246,7 +246,7 @@ export default function Analytics() {
                     {s.emailDetected && (
                       <span className="flex items-center gap-1 text-emerald-400 text-[10px] font-semibold shrink-0">
                         <AiOutlineMail size={12} />
-                        {s.email}
+                        <span className="hidden sm:inline">{s.email}</span>
                       </span>
                     )}
                     <span className="text-gray-600 text-[10px] shrink-0">{timeAgo(s.timestamp)}</span>

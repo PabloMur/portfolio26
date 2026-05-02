@@ -36,7 +36,7 @@ export default function Conversations() {
   const withEmail = sessions.filter((s) => s.emailDetected).length;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-8 space-y-6">
       <div>
         <p className="text-violet-400 font-mono text-xs tracking-widest uppercase mb-1">Dashboard</p>
         <h1 className="text-2xl font-bold text-white">Conversaciones</h1>
@@ -89,7 +89,7 @@ export default function Conversations() {
                     {s.emailDetected && (
                       <span className="flex items-center gap-1 text-emerald-400 text-[10px] font-semibold shrink-0">
                         <AiOutlineMail size={12} />
-                        {s.email}
+                        <span className="hidden sm:inline max-w-24 truncate">{s.email}</span>
                       </span>
                     )}
                     <span className="text-gray-600 text-[10px] shrink-0">{timeAgo(s.timestamp)}</span>
