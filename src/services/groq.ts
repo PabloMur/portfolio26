@@ -113,6 +113,46 @@ function buildCVSection(cvUrl: string): string {
   return `\n\n---\n\nCV / RESUME\n\nIf the user asks for Pablo's CV, resume, or curriculum vitae, share this direct download link: ${cvUrl}\nTell them they can download it directly from that link.`;
 }
 
+export async function analyzeHeatmapForUI(summary: string): Promise<string> {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: `Sos un analista senior de UX/UI. Te dan datos reales de heatmap y clicks de un portfolio web. Tu tarea es generar un informe en español con mejoras concretas y priorizadas.
+
+Estructura tu respuesta así:
+## Resumen ejecutivo
+(2-3 oraciones sobre el estado general de la UX)
+
+## Hallazgos principales
+(bullet points con lo más relevante que muestran los datos)
+
+## Mejoras recomendadas
+Para cada mejora indicá: descripción + prioridad (🔴 Alta / 🟡 Media / 🟢 Baja)
+
+## Quick wins
+(cambios pequeños de alto impacto que se pueden hacer rápido)
+
+Sé específico, directo y basate solo en los datos provistos.`,
+        },
+        { role: "user", content: summary },
+      ],
+      max_tokens: 900,
+      temperature: 0.4,
+    }),
+  });
+  if (!response.ok) throw new Error(`Groq API error: ${response.status}`);
+  const data = await response.json();
+  return data.choices[0].message.content as string;
+}
+
 export async function translateToEnglish(text: string): Promise<string> {
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",

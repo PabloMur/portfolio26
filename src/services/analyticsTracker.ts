@@ -1,4 +1,4 @@
-import { collection, addDoc, updateDoc, doc, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc, getDocs, query, orderBy, Timestamp, limit } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 export interface ChatSession {
@@ -184,4 +184,30 @@ export async function fetchPageViews(): Promise<PageView[]> {
     id: doc.id,
     ...(doc.data() as Omit<PageView, "id">),
   }));
+}
+
+export interface HeatmapReport {
+  id?: string;
+  page: string;
+  report: string;
+  generatedAt: Timestamp;
+}
+
+export async function saveHeatmapReport(page: string, report: string): Promise<string> {
+  const ref = await addDoc(collection(db, "heatmapReports"), {
+    page,
+    report,
+    generatedAt: Timestamp.now(),
+  });
+  return ref.id;
+}
+
+export async function fetchHeatmapReports(page?: string): Promise<HeatmapReport[]> {
+  const q = query(collection(db, "heatmapReports"), orderBy("generatedAt", "desc"), limit(20));
+  const snapshot = await getDocs(q);
+  const all = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as Omit<HeatmapReport, "id">),
+  }));
+  return page ? all.filter((r) => r.page === page) : all;
 }

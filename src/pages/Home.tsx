@@ -3,14 +3,17 @@ import { AiOutlineGithub, AiFillLinkedin, AiOutlineArrowRight, AiOutlineDownload
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { fetchActiveCV } from "../services/cv";
+import { fetchProjects } from "../services/airtable";
 
 export default function Home() {
   const { t, lang } = useLanguage();
   const h = t.home;
   const [cvUrl, setCvUrl] = useState<string | null>(null);
+  const [projectCount, setProjectCount] = useState<number | null>(null);
 
   useEffect(() => {
     fetchActiveCV().then((cv) => { if (cv) setCvUrl(cv.url); }).catch(() => {});
+    fetchProjects().then((p) => setProjectCount(p.length)).catch(() => {});
   }, []);
 
   return (
@@ -43,59 +46,68 @@ export default function Home() {
 
           {/* Subtitle */}
           <p
-            className="mb-7 max-w-xl text-sm text-gray-400 animate-fade-in-up sm:text-base md:text-lg"
+            className="mb-8 max-w-xl text-base text-gray-300 animate-fade-in-up sm:text-lg leading-relaxed"
             style={{ animationDelay: "0.3s" }}
           >
             {h.subtitle}
           </p>
 
-          {/* CTAs */}
+          {/* CTAs — jerarquía basada en datos del heatmap */}
           <div
-            className="mb-8 grid w-full grid-cols-2 gap-3 animate-fade-in-up sm:flex sm:flex-row sm:flex-wrap sm:w-auto"
+            className="mb-8 flex flex-col w-full gap-3 animate-fade-in-up sm:w-auto"
             style={{ animationDelay: "0.4s" }}
           >
-            <a
-              href="https://www.linkedin.com/in/pablo-nicolas-murillo/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
-            >
-              <AiFillLinkedin className="text-lg" />
-              LinkedIn
-            </a>
-            <a
-              href="https://github.com/PabloMur"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
-            >
-              <AiOutlineGithub className="text-lg" />
-              GitHub
-            </a>
-            <Link
-              to="/projects"
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 bg-transparent px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900"
-            >
-              {h.ctaSecondary}
-            </Link>
-            <Link
-              to="/contact"
-              className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
-            >
-              {h.ctaPrimary}
-              <AiOutlineArrowRight />
-            </Link>
-            {cvUrl && (
+            {/* Primary: Proyectos */}
+            <div className="flex gap-3">
+              <Link
+                to="/projects"
+                className="flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
+              >
+                {h.ctaSecondary}
+                {projectCount !== null && (
+                  <span className="bg-indigo-500/60 text-xs px-1.5 py-0.5 rounded-md font-mono">{projectCount}</span>
+                )}
+                <AiOutlineArrowRight />
+              </Link>
+              {cvUrl && (
+                <a
+                  href={cvUrl.replace("/raw/upload/", "/raw/upload/fl_attachment/")}
+                  download
+                  className="flex items-center justify-center gap-2 rounded-xl border border-violet-500/50 bg-violet-500/10 px-5 py-3.5 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20 shrink-0"
+                >
+                  <AiOutlineDownload className="text-base" />
+                  CV
+                </a>
+              )}
+            </div>
+
+            {/* Secondary: Contact + socials */}
+            <div className="flex gap-3">
+              <Link
+                to="/contact"
+                className="flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white"
+              >
+                {h.ctaPrimary}
+              </Link>
               <a
-                href={cvUrl}
+                href="https://www.linkedin.com/in/pablo-nicolas-murillo/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded-xl border border-violet-500/50 bg-violet-500/10 px-6 py-3 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-500/20 col-span-2 sm:col-span-1"
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white shrink-0"
+                aria-label="LinkedIn"
               >
-                <AiOutlineDownload className="text-base" />
-                {lang === "es" ? "Descargar CV" : "Download CV"}
+                <AiFillLinkedin className="text-lg" />
               </a>
-            )}
+              <a
+                href="https://github.com/PabloMur"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-4 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 hover:text-white shrink-0"
+                aria-label="GitHub"
+              >
+                <AiOutlineGithub className="text-lg" />
+              </a>
+            </div>
           </div>
 
           {/* Stats */}
@@ -129,6 +141,12 @@ export default function Home() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce opacity-30">
+        <div className="w-px h-8 bg-gray-500 rounded-full" />
+        <div className="w-1.5 h-1.5 rounded-full bg-gray-500" />
       </div>
 
       {/* Background blobs */}
