@@ -117,15 +117,17 @@ export default function Analytics() {
       {/* Visitas por día */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
         <h2 className="text-white text-sm font-semibold mb-6">Visitas últimos 7 días</h2>
-        <div className="flex items-end gap-2 h-32">
+        <div className="flex gap-2">
           {visitsByDay.map((d) => (
-            <div key={d.label} className="flex-1 flex flex-col items-center gap-2">
-              <span className="text-gray-500 text-xs">{d.count || ""}</span>
-              <div
-                className="w-full bg-indigo-600 rounded-t-md transition-all"
-                style={{ height: `${(d.count / maxDay) * 100}%`, minHeight: d.count ? "4px" : "0" }}
-              />
-              <span className="text-gray-600 text-xs">{d.label}</span>
+            <div key={d.label} className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-gray-500 text-xs h-4 leading-none">{d.count || ""}</span>
+              <div className="w-full flex items-end" style={{ height: "96px" }}>
+                <div
+                  className="w-full bg-indigo-600 rounded-t-md transition-all"
+                  style={{ height: `${(d.count / maxDay) * 100}%`, minHeight: d.count ? "4px" : "0" }}
+                />
+              </div>
+              <span className="text-gray-600 text-xs mt-1 truncate w-full text-center">{d.label}</span>
             </div>
           ))}
         </div>

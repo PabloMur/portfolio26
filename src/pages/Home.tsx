@@ -143,12 +143,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce opacity-30">
-        <div className="w-px h-8 bg-gray-500 rounded-full" />
-        <div className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-      </div>
-
       {/* Background blobs */}
       <div className="absolute top-1/3 -left-20 w-64 md:w-125 h-64 md:h-125 bg-violet-600 rounded-full opacity-20 blur-[120px]" />
       <div className="absolute -bottom-20 right-0 w-80 md:w-150 h-52 md:h-100 bg-violet-600 rounded-full opacity-20 blur-[120px]" />
