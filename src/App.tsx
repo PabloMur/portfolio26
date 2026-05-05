@@ -21,6 +21,7 @@ import Analytics from "./pages/dashboard/Analytics";
 import Conversations from "./pages/dashboard/Conversations";
 import Heatmap from "./pages/dashboard/Heatmap";
 import CVManager from "./pages/dashboard/CVManager";
+import Certificates from "./pages/dashboard/Certificates";
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
         <Route path="conversations" element={<Conversations />} />
         <Route path="heatmap" element={<Heatmap />} />
         <Route path="cv" element={<CVManager />} />
+        <Route path="certificates" element={<Certificates />} />
         <Route path="projects" element={<DashboardProjects />} />
         <Route path="kanban" element={<Kanban />} />
         <Route path="ideas" element={<Ideas />} />

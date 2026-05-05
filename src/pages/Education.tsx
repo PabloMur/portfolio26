@@ -1,9 +1,16 @@
+import { useState, useEffect } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { useLanguage } from "../context/LanguageContext";
+import { fetchCertificates, type Certificate } from "../services/certificates";
 
 export default function Education() {
   const { t } = useLanguage();
   const ed = t.education;
+  const [certs, setCerts] = useState<Certificate[]>([]);
+
+  useEffect(() => {
+    fetchCertificates().then(setCerts).catch(() => {});
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-gray-950 overflow-hidden py-16 px-6 sm:px-8">
@@ -58,6 +65,50 @@ export default function Education() {
             {ed.certButton}
           </a>
         </div>
+
+        {/* Certificados dinámicos */}
+        {certs.length > 0 && (
+          <div className="animate-fade-in-up mt-6" style={{ animationDelay: "0.4s" }}>
+            <h2 className="text-white font-semibold text-lg mb-4">Certificaciones</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {certs.map((cert) => (
+                <div
+                  key={cert.id}
+                  className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-violet-500/30 transition-colors group"
+                >
+                  {cert.imageUrl ? (
+                    <div className="h-36 overflow-hidden bg-gray-800">
+                      <img
+                        src={cert.imageUrl}
+                        alt={cert.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-36 bg-gray-800 flex items-center justify-center">
+                      <span className="text-4xl opacity-20">🎓</span>
+                    </div>
+                  )}
+                  <div className="p-4 space-y-1.5">
+                    <p className="text-white text-sm font-semibold">{cert.title}</p>
+                    <p className="text-gray-500 text-xs">{cert.issuer} · {cert.date}</p>
+                    {cert.url && (
+                      <a
+                        href={cert.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-xs transition-colors mt-1"
+                      >
+                        <AiOutlineLink size={12} />
+                        Ver credencial
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="absolute top-1/4 -right-20 w-64 md:w-125 h-64 md:h-125 bg-violet-600 rounded-full opacity-20 blur-[120px] pointer-events-none" />
